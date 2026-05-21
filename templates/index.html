@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extracteur de Frames 4K</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title:before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        #videoFile {
+            display: none;
+        }
+
+        .video-info {
+            display: none;
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .video-info.show {
+            display: block;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+            user-select: none;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.2);
+        }
+
+        .progress-section {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .progress-section.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group.single {
+            grid-template-columns: 1fr;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #ee5a52;
+        }
+
+        .btn-success {
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #40c057;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-success {
+            background: #d3f9d8;
+            color: #2f9e44;
+            border-left: 4px solid #2f9e44;
+        }
+
+        .status-error {
+            background: #ffe0e0;
+            color: #c92a2a;
+            border-left: 4px solid #c92a2a;
+        }
+
+        .status-info {
+            background: #d0ebff;
+            color: #1c7ed6;
+            border-left: 4px solid #1c7ed6;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            background: #f9f9f9;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .enhancement-badge {
+            background: #ff922b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Frame Extractor</h1>
+            <p>Extracteur de Frames Vidéo - 4K Enhancement</p>
+        </div>
+
+        <div class="content">
+            <!-- Upload Section -->
+            <div class="section">
+                <div class="section-title">Sélectionner Vidéo</div>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📹</div>
+                    <div class="upload-text">
+                        Cliquez ou glissez une vidéo<br>
+                        <small>(MP4, AVI, MOV, MKV - Max 500MB)</small>
+                    </div>
+                </div>
+                <input type="file" id="videoFile" accept=".mp4,.avi,.mov,.mkv,.flv,.wmv">
+                
+                <div class="video-info" id="videoInfo">
+                    <div class="info-row">
+                        <span class="info-label">Résolution:</span>
+                        <span class="info-value" id="infoResolution">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">FPS:</span>
+                        <span class="info-value" id="infoFps">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Durée:</span>
+                        <span class="info-value" id="infoDuration">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Frames Total:</span>
+                        <span class="info-value" id="infoFrames">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="section">
+                <div class="section-title">Paramètres</div>
+                
+                <div class="input-group">
+                    <label for="interval">Intervalle (secondes)</label>
+                    <input type="number" id="interval" min="0.1" max="60" step="0.1" value="1">
+                </div>
+            </div>
+
+            <!-- Enhancements Section -->
+            <div class="section">
+                <div class="section-title">Améliorations 4K <span class="badge enhancement-badge">NEW</span></div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="upscale4k">
+                        <label for="upscale4k">📈 Upscale 4K (3840x2160)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="denoise">
+                        <label for="denoise">🌫️ Débruitage</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sharpen">
+                        <label for="sharpen">🔍 Netteté Avancée</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="contrast">
+                        <label for="contrast">⚡ Améliorer Contraste</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="saturation">
+                        <label for="saturation">🎨 Améliorer Saturation</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status/Progress Section -->
+            <div class="progress-section" id="progressSection">
+                <div id="statusMessage" class="status-message"></div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+                <div class="progress-text" id="progressText">Prêt</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group" id="buttonGroup">
+                <button class="btn-primary" id="startBtn" disabled>
+                    ▶️ Démarrer
+                </button>
+                <button class="btn-secondary" id="clearBtn">
+                    🗑️ Effacer
+                </button>
+            </div>
+
+            <div class="button-group single" id="cancelGroup" style="display: none;">
+                <button class="btn-danger" id="cancelBtn">
+                    ⏹️ Annuler
+                </button>
+                <button class="btn-success" id="downloadBtn" style="display: none;">
+                    📥 Télécharger Frames
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Version Web 1.0 - Déployé pour Téléphone & Navigateur</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const videoFile = document.getElementById('videoFile');
+        const videoInfo = document.getElementById('videoInfo');
+        const interval = document.getElementById('interval');
+        const startBtn = document.getElementById('startBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const progressSection = document.getElementById('progressSection');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const statusMessage = document.getElementById('statusMessage');
+        const buttonGroup = document.getElementById('buttonGroup');
+        const cancelGroup = document.getElementById('cancelGroup');
+
+        let currentFilename = null;
+
+        // Upload Area Events
+        uploadArea.addEventListener('click', () => videoFile.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFileUpload(e.dataTransfer.files[0]);
+        });
+
+        videoFile.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        function handleFileUpload(file) {
+            const formData = new FormData();
+            formData.append('video', file);
+
+            showStatus('Chargement vidéo...', 'info');
+            startBtn.disabled = true;
+
+            fetch('/api/video-info', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    currentFilename = data.filename;
+                    document.getElementById('infoResolution').textContent = data.resolution;
+                    document.getElementById('infoFps').textContent = data.fps;
+                    document.getElementById('infoDuration').textContent = data.duration + 's';
+                    document.getElementById('infoFrames').textContent = data.total_frames;
+                    videoInfo.classList.add('show');
+                    startBtn.disabled = false;
+                    showStatus('Vidéo chargée ✓', 'success');
+                } else {
+                    showStatus('Erreur: ' + data.error, 'error');
+                }
+            })
+            .catch(err => showStatus('Erreur: ' + err, 'error'));
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message show status-' + type;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (!currentFilename) return;
+
+            const data = {
+                filename: currentFilename,
+                interval: parseFloat(interval.value),
+                upscale_4k: document.getElementById('upscale4k').checked,
+                denoise: document.getElementById('denoise').checked,
+                sharpen: document.getElementById('sharpen').checked,
+                contrast: document.getElementById('contrast').checked,
+                saturation: document.getElementById('saturation').checked
+            };
+
+            startBtn.disabled = true;
+            buttonGroup.style.display = 'none';
+            cancelGroup.style.display = 'grid';
+            progressSection.classList.add('show');
+            downloadBtn.style.display = 'none';
+
+            fetch('/api/extract', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showStatus('Extraction démarrée...', 'info');
+                    updateProgress();
+                } else {
+                    showStatus('Erreur: ' + data.error, 'error');
+                }
+            });
+        });
+
+        function updateProgress() {
+            fetch('/api/status')
+            .then(r => r.json())
+            .then(data => {
+                progressFill.style.width = data.progress + '%';
+                progressFill.textContent = data.progress + '%';
+                progressText.textContent = data.message;
+
+                if (data.status === 'completed') {
+                    showStatus('✓ Extraction terminée!', 'success');
+                    downloadBtn.style.display = 'block';
+                } else if (data.status === 'error') {
+                    showStatus('✗ ' + data.message, 'error');
+                } else if (data.status !== 'cancelled') {
+                    setTimeout(updateProgress, 500);
+                }
+            });
+        }
+
+        cancelBtn.addEventListener('click', () => {
+            fetch('/api/cancel', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => {
+                showStatus('Extraction annulée', 'info');
+                resetUI();
+            });
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            window.location.href = '/api/download-frames';
+        });
+
+        clearBtn.addEventListener('click', () => {
+            fetch('/api/clear', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => {
+                resetUI();
+                showStatus('Données effacées', 'info');
+            });
+        });
+
+        function resetUI() {
+            currentFilename = null;
+            videoFile.value = '';
+            videoInfo.classList.remove('show');
+            progressSection.classList.remove('show');
+            buttonGroup.style.display = 'grid';
+            cancelGroup.style.display = 'none';
+            startBtn.disabled = true;
+            downloadBtn.style.display = 'none';
+            progressFill.style.width = '0%';
+            progressFill.textContent = '0%';
+            statusMessage.className = 'status-message';
+        }
+    </script>
+</body>
+</html>

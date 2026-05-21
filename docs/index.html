@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Frame Extractor - GitHub Pages</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2f2fc0, #0f0f3e);
+            color: white;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        p.lead {
+            font-size: 1.2rem;
+            color: #d7dbff;
+            max-width: 720px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        .card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 35px 120px rgba(0,0,0,0.15);
+        }
+        h2 {
+            margin-top: 0;
+            color: #eef4ff;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        a.button {
+            display: inline-block;
+            color: #0f0f3e;
+            background: #ffffff;
+            padding: 14px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease;
+        }
+        a.button:hover {
+            transform: translateY(-2px);
+        }
+        .note {
+            border-left: 4px solid #9a9cff;
+            padding-left: 16px;
+            color: #e7e9ff;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #b7bbff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Video Frame Extractor</h1>
+            <p class="lead">Bienvenue dans la page GitHub Pages du projet. Ce site présente le projet et explique comment exécuter l'application localement ou depuis un serveur compatible.</p>
+        </header>
+
+        <div class="card">
+            <h2>Ce que vous pouvez déployer sur GitHub Pages</h2>
+            <p class="note">GitHub Pages ne peut pas exécuter un serveur Python ou OpenCV. Il héberge uniquement du contenu statique (HTML/CSS/JS).</p>
+            <ul>
+                <li>Documentation du projet</li>
+                <li>Guide d'installation</li>
+                <li>Présentation des fonctionnalités</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Comment utiliser l'application</h2>
+            <ul>
+                <li>Exécutez le serveur localement : <code>python app_web.py</code></li>
+                <li>Accédez à <strong>http://localhost:5000</strong></li>
+                <li>Sur téléphone, ouvrez l'adresse réseau de votre PC : <strong>http://<votre_ip>:5000</strong></li>
+            </ul>
+            <a class="button" href="https://github.com/" target="_blank">Voir le code sur GitHub</a>
+        </div>
+
+        <div class="card">
+            <h2>Déploiement recommandé</h2>
+            <ul>
+                <li>GitHub Pages : pour la documentation uniquement</li>
+                <li>Replit / PythonAnywhere / Heroku : pour la version web réelle</li>
+                <li>Docker ou VPS : si vous souhaitez exécuter Flask en production</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Documentation rapide</h2>
+            <ul>
+                <li><strong>app.py</strong> : application Tkinter locale</li>
+                <li><strong>app_web.py</strong> : serveur Flask pour navigateur</li>
+                <li><strong>templates/index.html</strong> : interface web mobile</li>
+                <li><strong>docs/index.html</strong> : page statique GitHub Pages</li>
+            </ul>
+        </div>
+
+        <footer>
+            Déployez ce dossier <code>docs/</code> sur GitHub Pages pour un site de présentation et de documentation.
+        </footer>
+    </div>
+</body>
+</html>
