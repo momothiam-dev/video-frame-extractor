@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.env.*
+
+# Uploads and outputs
+uploads/
+extracted_frames/
+test_output/
+
+# Editor files
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
