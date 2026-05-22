@@ -53,23 +53,37 @@ def get_video_info():
     """Récupère les infos de la vidéo uploadée"""
     try:
         if 'video' not in request.files:
-            return jsonify({'error': 'Aucun fichier'}), 400
+            return jsonify({'success': False, 'error': 'Aucun fichier sélectionné'}), 400
         
         file = request.files['video']
         if file.filename == '':
-            return jsonify({'error': 'Fichier vide'}), 400
+            return jsonify({'success': False, 'error': 'Fichier vide'}), 400
         
         if not allowed_file(file.filename):
-            return jsonify({'error': 'Format non supporté'}), 400
+            return jsonify({'success': False, 'error': f'Format non supporté. Formats autorisés: {", ".join(ALLOWED_EXTENSIONS)}'}), 400
+        
+        # Créer dossier uploads s'il n'existe pas
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         
         # Sauvegarder le fichier
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+        
+        try:
+            file.save(filepath)
+        except Exception as save_err:
+            return jsonify({'success': False, 'error': f'Erreur sauvegarde: {str(save_err)}'}), 500
+        
+        # Vérifier que le fichier existe
+        if not os.path.exists(filepath):
+            return jsonify({'success': False, 'error': 'Fichier non sauvegardé correctement'}), 500
         
         # Récupérer les infos
-        extractor = FrameExtractor(filepath, OUTPUT_FOLDER)
-        info = extractor.get_video_info()
+        try:
+            extractor = FrameExtractor(filepath, app.config['UPLOAD_FOLDER'])
+            info = extractor.get_video_info()
+        except Exception as cv_err:
+            return jsonify({'success': False, 'error': f'Erreur OpenCV: {str(cv_err)}'}), 500
         
         if info:
             return jsonify({
@@ -81,10 +95,12 @@ def get_video_info():
                 'total_frames': info['total_frames']
             })
         else:
-            return jsonify({'error': 'Impossible de lire la vidéo'}), 400
+            return jsonify({'success': False, 'error': 'Impossible de lire la vidéo. Vérifiez le format et la taille'}), 400
             
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        error_details = traceback.format_exc()
+        return jsonify({'success': False, 'error': f'Erreur: {str(e)}', 'details': error_details}), 500
 
 
 @app.route('/api/extract', methods=['POST'])

@@ -529,18 +529,30 @@
         });
 
         function handleFileUpload(file) {
+            // Vérifier la taille du fichier avant upload
+            const maxSize = 500 * 1024 * 1024; // 500 MB
+            if (file.size > maxSize) {
+                showStatus(`❌ Fichier trop gros (${(file.size / 1024 / 1024).toFixed(2)}MB / 500MB max)`, 'error');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('video', file);
 
-            showStatus('Chargement vidéo...', 'info');
+            showStatus('⏳ Chargement et analyse vidéo...', 'info');
             startBtn.disabled = true;
+            progressSection.classList.add('show');
 
             fetch('/api/video-info', {
                 method: 'POST',
                 body: formData
             })
-            .then(r => r.json())
+            .then(r => {
+                console.log('Response status:', r.status);
+                return r.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.success) {
                     currentFilename = data.filename;
                     document.getElementById('infoResolution').textContent = data.resolution;
@@ -549,12 +561,21 @@
                     document.getElementById('infoFrames').textContent = data.total_frames;
                     videoInfo.classList.add('show');
                     startBtn.disabled = false;
-                    showStatus('Vidéo chargée ✓', 'success');
+                    showStatus('✅ Vidéo chargée avec succès!', 'success');
                 } else {
-                    showStatus('Erreur: ' + data.error, 'error');
+                    showStatus('❌ ' + (data.error || 'Erreur inconnue'), 'error');
+                    currentFilename = null;
+                    videoInfo.classList.remove('show');
+                    startBtn.disabled = true;
                 }
             })
-            .catch(err => showStatus('Erreur: ' + err, 'error'));
+            .catch(err => {
+                console.error('Error:', err);
+                showStatus('❌ Erreur réseau ou serveur: ' + err.message, 'error');
+                currentFilename = null;
+                videoInfo.classList.remove('show');
+                startBtn.disabled = true;
+            });
         }
 
         function showStatus(message, type) {
